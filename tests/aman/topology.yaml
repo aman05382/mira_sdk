@@ -1,0 +1,210 @@
+# Network Topology Definition
+name: datacenter-fabric
+
+metadata:
+  description: "Data Center Leaf-Spine Fabric"
+  version: "1.0"
+  environment: "production"
+
+default_credentials:
+  username: admin
+  password: YourPaSsWoRd
+
+devices:
+  # Spine Switches
+  - name: spine1
+    host: 192.168.1.10
+    device_type: SWITCH
+    role: SPINE
+    vendor: SONIC
+    platform: SONIC
+    model: AS7712-32X
+    mgmt_port: 22
+    credentials:
+      username: admin
+      password: YourPaSsWoRd
+    labels: [production, fabric]
+    groups: [spines, sonic-devices]
+    interfaces:
+      - name: Ethernet0
+        interface_type: ETHERNET
+        speed: 100G
+      - name: Ethernet4
+        interface_type: ETHERNET
+        speed: 100G
+      - name: Ethernet8
+        interface_type: ETHERNET
+        speed: 100G
+      - name: Ethernet12
+        interface_type: ETHERNET
+        speed: 100G
+
+  - name: spine2
+    host: 192.168.1.11
+    device_type: SWITCH
+    role: SPINE
+    vendor: SONIC
+    platform: SONIC
+    model: AS7712-32X
+    mgmt_port: 22
+    labels: [production, fabric]
+    groups: [spines, sonic-devices]
+    interfaces:
+      - name: Ethernet0
+        interface_type: ETHERNET
+        speed: 100G
+      - name: Ethernet4
+        interface_type: ETHERNET
+        speed: 100G
+      - name: Ethernet8
+        interface_type: ETHERNET
+        speed: 100G
+      - name: Ethernet12
+        interface_type: ETHERNET
+        speed: 100G
+
+  # Leaf Switches
+  - name: leaf1
+    host: 192.168.1.20
+    device_type: SWITCH
+    role: LEAF
+    vendor: SONIC
+    platform: SONIC
+    model: AS7326-56X
+    mgmt_port: 22
+    labels: [production, fabric, rack1]
+    groups: [leaves, sonic-devices, rack1]
+    interfaces:
+      - name: Ethernet48
+        interface_type: ETHERNET
+        speed: 100G
+        description: "Uplink to Spine1"
+      - name: Ethernet52
+        interface_type: ETHERNET
+        speed: 100G
+        description: "Uplink to Spine2"
+      - name: Ethernet0
+        interface_type: ETHERNET
+        speed: 25G
+        description: "To Server1"
+      - name: Ethernet4
+        interface_type: ETHERNET
+        speed: 25G
+        description: "To Traffic Gen"
+
+  - name: leaf2
+    host: 192.168.1.21
+    device_type: SWITCH
+    role: LEAF
+    vendor: SONIC
+    platform: SONIC
+    model: AS7326-56X
+    mgmt_port: 22
+    labels: [production, fabric, rack2]
+    groups: [leaves, sonic-devices, rack2]
+    interfaces:
+      - name: Ethernet48
+        interface_type: ETHERNET
+        speed: 100G
+        description: "Uplink to Spine1"
+      - name: Ethernet52
+        interface_type: ETHERNET
+        speed: 100G
+        description: "Uplink to Spine2"
+      - name: Ethernet0
+        interface_type: ETHERNET
+        speed: 25G
+        description: "To Server2"
+      - name: Ethernet4
+        interface_type: ETHERNET
+        speed: 25G
+        description: "To Traffic Gen"
+  - name: ixia1
+    host: 192.168.1.100
+    vendor: IXIA
+    model: IxNetwork
+    interfaces:
+      - name: Ethernet48
+        interface_type: ETHERNET
+        speed: 100G
+        description: "Uplink to Spine1"
+      - name: Ethernet52
+        interface_type: ETHERNET
+        speed: 100G
+        description: "Uplink to Spine2"
+      - name: Ethernet0
+        interface_type: ETHERNET
+        speed: 25G
+        description: "To Server2"
+      - name: Ethernet4
+        interface_type: ETHERNET
+        speed: 25G
+        description: "To Traffic Gen"
+
+# Traffic Generators
+traffic_generators:
+  - name: ixia1
+    host: 192.168.1.100
+    vendor: IXIA
+    model: IxNetwork
+    api_port: 443
+    ports:
+      "1/1":
+        location: "192.168.1.101/1/1"
+        speed: "25G"
+        connected_to: "leaf1:Ethernet4"
+      "1/2":
+        location: "192.168.1.101/1/2"
+        speed: "25G"
+        connected_to: "leaf2:Ethernet4"
+
+# Links (Fabric interconnections)
+links:
+  # Spine1 to Leaves
+  - source_device: spine1
+    source_interface: Ethernet0
+    dest_device: leaf1
+    dest_interface: Ethernet48
+    link_type: PHYSICAL
+    speed: 100G
+    cost: 1
+
+  - source_device: spine1
+    source_interface: Ethernet4
+    dest_device: leaf2
+    dest_interface: Ethernet48
+    link_type: PHYSICAL
+    speed: 100G
+    cost: 1
+
+  # Spine2 to Leaves
+  - source_device: spine2
+    source_interface: Ethernet0
+    dest_device: leaf1
+    dest_interface: Ethernet52
+    link_type: PHYSICAL
+    speed: 100G
+    cost: 1
+
+  - source_device: spine2
+    source_interface: Ethernet4
+    dest_device: leaf2
+    dest_interface: Ethernet52
+    link_type: PHYSICAL
+    speed: 100G
+    cost: 1
+
+  # Traffic Generator Links
+  - source_device: ixia1
+    source_interface: "1/1"
+    dest_device: leaf1
+    dest_interface: Ethernet4
+    link_type: PHYSICAL
+    speed: 25G
+
+  - source_device: ixia1
+    source_interface: "1/2"
+    dest_device: leaf2
+    dest_interface: Ethernet4
+    link_type: PHYSICAL
+    speed: 25G

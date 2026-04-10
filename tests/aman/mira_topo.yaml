@@ -1,0 +1,166 @@
+# Network Topology Definition
+name: Test Data Center Fabric
+
+metadata:
+  description: "Data Center Leaf-spine Fabric"
+  version: "1.0"
+  environment: "production"
+  author: "netops-team"
+  created: "2024-01-15"
+
+default_credentials:
+  profiles:
+    sonic:
+      username: admin
+      password: YourPaSsWoRd
+    ixia:
+      username: admin
+      password: YourPaSsWoRd
+
+devices:
+  # spine Switches
+  R1:
+    alias: "R1"
+    type: router
+    role: spine
+    vendor: sonic
+    platform: sonic
+    model: AS7712-32X
+    default_connection: ssh
+    management:
+      ssh:
+        ipv4: "10.0.1.10"
+        port: 22
+    console:
+      a:
+        alias: "a"
+        protocol: "telnet"
+        port: 23
+        ipv4: "10.0.1.10"
+    # Reference a different profile
+    credentials:
+      profile: "sonic"
+
+    location:
+      site: "BLR1"
+      rack: "R01"
+      position: "U40"
+
+    labels: [production, fabric]
+    groups: [spines, sonic-devices]
+    interfaces:
+      Ethernet0:
+        alias: "R1_SW1_1"
+        speed: "100G"
+
+      Ethernet4:
+        alias: "R1_SW1_2"
+        speed: "100G"
+
+      Ethernet8:
+        alias: "R1_SW1_3"
+        speed: "100G"
+
+      Ethernet12:
+        alias: "R1_SW1_4"
+        speed: "100G"
+
+      Ethernet10:
+        alias: "R1_R3_1"
+        speed: "100G"
+
+      Ethernet16:
+        alias: "R1_TGN_1"
+        speed: "100G"
+
+      Ethernet20:
+        alias: "R1_TGN_2"
+        speed: "100G"
+
+  SW1:
+    alias: "SW1"
+    type: switch
+    role: spine
+    vendor: sonic
+    platform: sonic
+    model: AS7712-32X
+    management:
+      ssh:
+        ipv4: "10.0.1.11"
+        port: 22
+    console:
+      a:
+        alias: "a"
+        protocol: "telnet"
+        port: 23
+        ipv4: "10.0.1.11"
+    credentials:
+      username: admin
+      password: YourPaSsWoRd
+
+    labels: [production, fabric]
+    groups: [spines, sonic-devices]
+    interfaces:
+      Ethernet0:
+        alias: "R1_SW1_1"
+        speed: "100G"
+
+      Ethernet4:
+        alias: "R1_SW1_2"
+        speed: "100G"
+
+      Ethernet8:
+        alias: "R1_SW1_3"
+        speed: "100G"
+
+      Ethernet12:
+        alias: "R1_SW1_4"
+        speed: "100G"
+
+  R3:
+    alias: "R3"
+    type: router
+    role: spine
+    vendor: sonic
+    platform: sonic
+    model: AS7712-32X
+    management:
+      ssh:
+        ipv4: "10.0.1.16"
+        port: 22
+    console:
+      a:
+        alias: "a"
+        protocol: "telnet"
+        port: 23
+        ipv4: "10.0.1.16"
+
+    # Use profile but override password
+    credentials:
+      profile: "sonic" # Base profile
+      password: "OverriddenPassword!" # Override specific field
+
+    interfaces:
+      Ethernet0:
+        alias: "R1_R3_1"
+        speed: "100G"
+
+  TGN:
+    alias: "TGN"
+    type: traffic_generator
+    role: IXIA
+    vendor: IXIA
+    platform: IXIA
+    model: IXN-4000E
+    chassis_ip: "10.0.1.14"
+    credentials:
+      profile: "ixia"
+    labels: [production, traffic-generators, ptf-devices]
+    groups: [ixia-devices]
+    interfaces:
+      10.0.1.14/1/1:
+        alias: "R1_TGN_1"
+        speed: "100G"
+      10.0.1.14/1/2:
+        alias: "R1_TGN_2"
+        speed: "100G"

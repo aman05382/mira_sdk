@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "name": "mira_input test json file"
+  },
+  "device_mappings": {
+    "RTR1": {
+      "alias": "R1"
+    },
+    "SW1": {
+      "alias": "SW1"
+    },
+    "IXIA1": {
+      "alias": "TGN"
+    }
+  },
+  "link_mappings": {
+    "R1_SW1_1": {
+      "members": ["R1_SW1_1.R1", "R1_SW1_1.SW1"]
+    },
+    "R1_TGN_1": {
+      "members": ["R1_T1_1.R1", "R1_T1_1.TGN"]
+    }
+  },
+  "base_configuration": {
+    "scale_config_via_file": true
+  },
+  "interface_configuration": {},
+  "feature_configuration": {},
+  "testcase_configuration": {},
+  "traffic_generator_configuration": {}
+}

@@ -1,0 +1,8 @@
+netmiko
+pyyaml
+paramiko
+pytest
+allure-pytest
+allure-python-commons
+redis
+colorama
